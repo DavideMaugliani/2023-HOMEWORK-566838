@@ -20,17 +20,17 @@ import it.uniroma3.diadia.attrezzi.*;
  * @version base
 */
 
-public class Stanza {
+public class StanzaProtected {
 	
-	private String nome;
-    private Set<Attrezzo> attrezzi;
-    private Map<String, Stanza> stanzeAdiacenti;
+	protected String nome;
+    protected Set<Attrezzo> attrezzi;
+    protected Map<String, Stanza> stanzeAdiacenti;
     
     /**
      * Crea una stanza. Non ci sono stanze adiacenti, non ci sono attrezzi.
      * @param nome il nome della stanza
      */
-    public Stanza(String nome) {
+    public StanzaProtected(String nome) {
         this.nome = nome;
         this.stanzeAdiacenti = new HashMap<>();
         this.attrezzi = new HashSet<>();
@@ -100,10 +100,10 @@ public class Stanza {
 		risultato.append(" " + this.stanzeAdiacenti.keySet());
 		
 		risultato.append("\nAttrezzi nella stanza: ");
-		if(attrezzi.isEmpty()) risultato.append("Non ci sono attrezzi");
+		if(!attrezzi.isEmpty()) risultato.append("Non ci sono attrezzi");
 		else {
-			
-			risultato.append(this.attrezzi);
+		for (Attrezzo attrezzo : this.attrezzi) 
+			risultato.append(attrezzo.toString()+" ");
 		}
 		return risultato.toString();
 	}
