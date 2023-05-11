@@ -5,8 +5,9 @@ import java.util.List;
 
 public class IOSimulator implements IO {
 	
-	private List<String> input;
 	private List<String> output;
+	private List<String> input;
+	
 	
 	public IOSimulator(List<String> righeDaLeggere) {
 		this.input=righeDaLeggere;

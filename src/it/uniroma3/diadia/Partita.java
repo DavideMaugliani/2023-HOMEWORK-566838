@@ -15,8 +15,8 @@ public class Partita {
 
 	private Stanza stanzaCorrente;
 	private Labirinto labirinto;
-	private boolean finita;
 	private Giocatore giocatore;
+	private boolean finita;
 	
 	public Partita(){
 		this.labirinto = new Labirinto();
@@ -35,15 +35,15 @@ public class Partita {
 	public Giocatore getGiocatore() {
 		return giocatore;
 	}
+	
+	public Stanza getStanzaCorrente() {
+		return this.stanzaCorrente;
+	}
 
 	public void setStanzaCorrente(Stanza stanzaCorrente) {
 		this.stanzaCorrente = stanzaCorrente;
 	}
 
-	public Stanza getStanzaCorrente() {
-		return this.stanzaCorrente;
-	}
-	
 	/**
 	 * Restituisce vero se e solo se la partita e' stata vinta
 	 * @return vero se partita vinta
