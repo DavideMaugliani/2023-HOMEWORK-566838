@@ -1,23 +1,27 @@
 package it.uniroma3.diadia.giocatore;
-
 import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.Test;
 
-public class GiocatoreTest {
-	Giocatore giocatore;
+import it.uniroma3.diadia.giocatore.Giocatore;
 
-	@Before
-	public void setUp() throws Exception {
-		giocatore= new Giocatore();
+public class GiocatoreTest {
+	
+	Giocatore g = new Giocatore();
+	
+	@Test
+	public void testGetCfuDefault() {
+		assertEquals(20, g.getCfu());
+	}
+	
+	@Test
+	public void testSetCfu() {
+		g.setCfu(3);
+		assertEquals(3, g.getCfu());
 	}
 
 	@Test
-	public void testSetCfu() {
-		
-		giocatore.setCfu(5);
-		assertTrue(giocatore.getCfu()== 5);
+	public void testGetBorsaDefault() {
+		assertNotNull(g.getBorsa());
 	}
-
 }

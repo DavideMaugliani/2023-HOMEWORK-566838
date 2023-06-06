@@ -1,161 +1,235 @@
 package it.uniroma3.diadia.giocatore;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import it.uniroma3.diadia.attrezzi.Attrezzo;
+import it.uniroma3.diadia.attrezzi.ComparatoreAttrezziPerPeso;
 
 public class BorsaTest {
-	Borsa borsa;
-	Attrezzo attrezzo;
 
+	Borsa b;
+	Borsa b1;
+	Borsa b2;
+	Attrezzo falce;
+	Attrezzo pala;
+	Attrezzo sega;
+	Attrezzo martello;
+	Attrezzo computer;
+	Attrezzo laptop;
+	Attrezzo racchetta;
+
+	
 	@Before
-	public void setUp() throws Exception {
-		borsa= new Borsa();
-		attrezzo= new Attrezzo("osso",1);
-	}
-	
-	@Test
-	public void testAddAttrezzo() {
-		
-		assertTrue(borsa.addAttrezzo(attrezzo));
-	}
-	
-	@Test
-	public void testAddAttrezzo2() {
-
-		Attrezzo pesante= new Attrezzo("piombo",100);
-		
-		assertFalse(borsa.addAttrezzo(pesante));
-	}
-	
-	@Test
-	public void testAddAttrezzo3() {
-
-		for(int i=0; i<10; i++)
-		borsa.addAttrezzo(attrezzo);
-
-		assertFalse(borsa.addAttrezzo(attrezzo));
+	public void setUp() {
+		b = new Borsa();
+		b1 = new Borsa();
+		b2 = new Borsa();
+		falce = new Attrezzo("falce", 2);
+		pala = new Attrezzo("pala", 3);
+		racchetta = new Attrezzo("racchetta", 3);
+		martello = new Attrezzo("martello", 2);
+		sega = new Attrezzo("sega", 16);
+		computer = new Attrezzo("computer", 2);
+		laptop = new Attrezzo("laptop", 4);
 	}
 
 	@Test
-	public void testGetAttrezzo() {
-		
-		borsa.addAttrezzo(attrezzo);
-		assertEquals(attrezzo,borsa.getAttrezzo("osso"));
+	public void testAddAttrezzoPesoMinoreDiDieci() {
+		assertTrue(b.addAttrezzo(falce));
+
+	}
+	
+	@Test
+	public void testAddAttrezzoPesoMaggioreDiDieci() {
+		assertFalse(b.addAttrezzo(sega));
+
+	}
+	
+	@Test
+	public void testGetPeso() {
+		b.addAttrezzo(falce);
+		assertEquals(falce, b.getAttrezzo("falce"));
+
+	}
+	
+	@Test
+	public void testGetSortedSetOrdinatoPerPesoAttrezziStessoPeso() {
+		b1.addAttrezzo(falce);
+		b1.addAttrezzo(martello);
+		Set<Attrezzo> expected = new TreeSet<>(new ComparatoreAttrezziPerPeso());
+		expected.add(falce);
+		expected.add(martello);
+		assertArrayEquals(expected.toArray(), b1.getSortedSetOrdinatoPerPeso().toArray());
 	}
 
-	
+
 	@Test
-	public void testRemoveAttrezzo() {
-		
-		borsa.addAttrezzo(attrezzo);
-		borsa.removeAttrezzo("osso");
-		
-		assertFalse(borsa.hasAttrezzo("osso"));
+	public void testGetSortedSetOrdinatoPerPesoAttrezziDiversiPesoDiverso() {
+		b2.addAttrezzo(computer);
+		b2.addAttrezzo(laptop);
+		Set<Attrezzo> e = new TreeSet<>();
+		e.add(computer);
+		e.add(laptop);
+		assertArrayEquals(e.toArray(), b2.getSortedSetOrdinatoPerPeso().toArray());
 	}
 	
 	@Test
-	public void testAttrezziConStessoPesoNomeDiverso() {
-		Attrezzo attrezzo=new Attrezzo("libro",1);
-		Attrezzo attrezzoStessoPesoFuoriOrdine=new Attrezzo("spada",1);
-		this.borsa.addAttrezzo(attrezzoStessoPesoFuoriOrdine);
-		this.borsa.addAttrezzo(attrezzo);
-		assertEquals(Arrays.asList(attrezzo,attrezzoStessoPesoFuoriOrdine),this.borsa.getContenutoOrdinatoPerPeso());
+	public void testGetContenutoOrdinatoPerPesoStessoPeso() {
+		b2.addAttrezzo(martello);
+		b2.addAttrezzo(falce);
+		List<Attrezzo> ex = new ArrayList<>();
+		ex.add(falce);
+		ex.add(martello);
+		assertTrue(this.controllaList(ex, b2.getContenutoOrdinatoPerPeso()));
 	}
 	
 	@Test
-	public void testGetContenutoOrdinatoPerNome() {
-		Attrezzo attrezzo=new Attrezzo("libro",1);
-		ArrayList<Attrezzo> attrezzi=new ArrayList<>();
-		attrezzi.add(attrezzo);
-		borsa.SetAttrezzi(attrezzi);
+	public void testGetContenutoOrdinatoPerPesoPesiDiversi() {
+		b2.addAttrezzo(computer);
+		b2.addAttrezzo(laptop);
+		List<Attrezzo> ex = new ArrayList<>();
+		ex.add(computer);
+		ex.add(laptop);
+		//System.out.println(b2.getContenutoOrdinatoPerPeso());
+		assertTrue(this.controllaList(ex, b2.getContenutoOrdinatoPerPeso()));
+	}
+	
+	public boolean controllaList(List<?> c1, List<?> c2) {
+		if(c1.size()!=c2.size())
+			return false;
+		for(int i = 0; i<c1.size(); i++ ) {
+			if(!c1.get(i).equals(c2.get(i)) )
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean controllaSet(Set<Attrezzo> m1, Set<Attrezzo> m2) {
+		if(m1.size()!=m2.size())
+			return false;
+		Iterator<Attrezzo> iter1 = m1.iterator();
+		Iterator<Attrezzo> iter2 = m2.iterator();
+		while(iter1.hasNext() && iter2.hasNext()) {
+			if(!iter1.next().equals(iter2.next()))
+				return false;
+		}
+		return true;
+	}
+	
+	@Test
+	public void testControllaSet() {
+		Set<Attrezzo> e = new TreeSet<>();
+		e.add(falce);
+		e.add(martello);
+		assertTrue(this.controllaSet(e, e));
+	}
+	
+	@Test
+	public void testgetContenutoOrdinatoPerNomeStessoPeso() {
+		b2.addAttrezzo(martello);
+		b2.addAttrezzo(falce);
+
+		Set<Attrezzo> e = new TreeSet<>();
+		e.add(falce);
+		e.add(martello);
+		assertTrue(this.controllaSet(e, b2.getSortedSetOrdinatoPerPeso()));
+	}
+	
+	@Test
+	public void testgetContenutoOrdinatoPerNomePesoDiverso() {
+		b2.addAttrezzo(pala);
+		b2.addAttrezzo(martello);
+
+		Set<Attrezzo> e = new TreeSet<>();
+		e.add(pala);
+		e.add(martello);
 		
-		SortedSet<Attrezzo> set=borsa.getContenutoOrdinatoPerNome();
-		
-		attrezzi.clear();
-		attrezzi.addAll(set);
-		
-		assertEquals(attrezzi.get(0),attrezzo);
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerNome2() {
-		Attrezzo attrezzo=new Attrezzo("unguento",1);
-		Attrezzo attrezzo2=new Attrezzo("spada",3);
-		Attrezzo attrezzo3=new Attrezzo("libro",1);
-		ArrayList<Attrezzo> attrezzi=new ArrayList<>();
-		attrezzi.add(attrezzo);
-		attrezzi.add(attrezzo2);
-		attrezzi.add(attrezzo3);
-		borsa.SetAttrezzi(attrezzi);
-		
-		SortedSet<Attrezzo> set=borsa.getContenutoOrdinatoPerNome();
-		
-		attrezzi.clear();
-		attrezzi.addAll(set);
-		
-		assertEquals(attrezzi.get(0),attrezzo3);
-		assertEquals(attrezzi.get(1),attrezzo2);
-		assertEquals(attrezzi.get(2),attrezzo);
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerPesoRaggruppatoConSingoloAttrezzoBorsaVuota() {
-		assertTrue(this.borsa.getContenutoRaggruppatoPerPeso().isEmpty());
-		//assertEquals(Collections.emptyMap(),this.borsa.getContenutoRaggruppatoPerPeso());
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerPesoRaggruppatoConSingoloAttrezzoSingleton() {
-		Attrezzo attrezzo=new Attrezzo("attrezzo",1);
-		this.borsa.addAttrezzo(attrezzo);
-		Map<Integer, Set<Attrezzo>> singletonMap = Collections.singletonMap(1, Collections.singleton(attrezzo));
-		assertEquals(singletonMap,this.borsa.getContenutoRaggruppatoPerPeso());
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerPesoRaggruppatoConSingoloAttrezzoSingleton_DueAttrezzi() {
-		int stessoPeso = 1;
-		Attrezzo attrezzo=new Attrezzo("attrezzo",stessoPeso);
-		Attrezzo attrezzoStessoPeso=new Attrezzo("attrezzoStessoPeso",stessoPeso);
-		this.borsa.addAttrezzo(attrezzo);
-		this.borsa.addAttrezzo(attrezzoStessoPeso);
-		//Set<Attrezzo> insiemeAttrezziStessoPeso = Set.of(attrezzo,attrezzoStessoPeso); //Da java9+
-		Set<Attrezzo> insiemeAttrezziStessoPeso = new HashSet<>(Arrays.asList(attrezzo,attrezzoStessoPeso));
-		Map<Integer, Set<Attrezzo>> singletonMap = Collections.singletonMap(stessoPeso, insiemeAttrezziStessoPeso);
-		assertEquals(singletonMap,this.borsa.getContenutoRaggruppatoPerPeso());
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerPesoRaggruppatoConSingoloAttrezzoDoubleton_DueAttrezzi() {
-		Attrezzo attrezzo=new Attrezzo("attrezzo",1);
-		Attrezzo attrezzoAltroPeso=new Attrezzo("attrezzoAltroPeso",2);
-		this.borsa.addAttrezzo(attrezzo);
-		this.borsa.addAttrezzo(attrezzoAltroPeso);
-		Map<Integer, Set<Attrezzo>> doubletonMap = new HashMap<>();
-		doubletonMap.put(1, Collections.singleton(attrezzo));
-		doubletonMap.put(2, Collections.singleton(attrezzoAltroPeso));
-		assertEquals(doubletonMap,this.borsa.getContenutoRaggruppatoPerPeso());
-	}
-	
-	@Test
-	public void testGetContenutoOrdinatoPerPesoRaggruppatoConSingoloAttrezzo() {
-		Attrezzo a1=new Attrezzo("sedia",2);
-		this.borsa.addAttrezzo(a1);
-		Map<Integer,Set<Attrezzo>> listaAttrezziOrdinataPerPeso=this.borsa.getContenutoRaggruppatoPerPeso();
-		assertTrue(listaAttrezziOrdinataPerPeso.get(2).contains(a1));
+		assertTrue(this.controllaSet(e, b2.getSortedSetOrdinatoPerPeso()));
 	}
 
+	public boolean controllaMap(Map<Integer, Set<Attrezzo>> m1, Map<Integer, Set<Attrezzo>> m2) {
+		if(m1.size()!=m2.size())
+			return false;
+		
+		Iterator<Integer> iter1 = m1.keySet().iterator();
+		Iterator<Integer> iter2 = m2.keySet().iterator();
+		while(iter1.hasNext() && iter2.hasNext()) {
+			if(!this.controllaSet(m1.get(iter1.next()), m2.get(iter2.next()))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Test
+	public void testControllaMap() {
+		Map<Integer, Set<Attrezzo>> e = new TreeMap<>();
+		Set<Attrezzo> sing1 = new TreeSet<>();
+		Set<Attrezzo> sing2 = new TreeSet<>();
+		
+		sing1.add(martello);
+		sing2.add(pala);
+		
+		e.put(2, sing1);
+		e.put(3, sing2);
+		assertTrue(this.controllaMap(e, e));
+	}
+	
+	@Test
+	public void testGetContenutoRaggruppatoPerPesoPesiDiversiSingleton() {
+		b2.addAttrezzo(martello);
+		b2.addAttrezzo(pala);
+
+		Map<Integer, Set<Attrezzo>> e = new TreeMap<>();
+		Set<Attrezzo> sing1 = new TreeSet<>();
+		Set<Attrezzo> sing2 = new TreeSet<>();
+		
+		sing1.add(martello);
+		sing2.add(pala);
+		
+		e.put(2, sing1);
+		e.put(3, sing2);
+		
+		System.out.println(e);
+		System.out.println(b2.getContenutoRaggruppatoPerPeso());
+		assertTrue(this.controllaMap(e, b2.getContenutoRaggruppatoPerPeso()));
+	}
+	
+	@Test
+	public void testGetContenutoRaggruppatoPerPesoPesiDiversiGruppi() {
+		b2.addAttrezzo(martello);
+		b2.addAttrezzo(pala);
+		b2.addAttrezzo(racchetta);
+		b2.addAttrezzo(falce);
+
+		Map<Integer, Set<Attrezzo>> e = new TreeMap<>();
+		Set<Attrezzo> sing1 = new HashSet<>();
+		Set<Attrezzo> sing2 = new HashSet<>();
+		
+		sing1.add(martello);
+		sing2.add(pala);
+		sing2.add(racchetta);
+		sing1.add(falce);
+		
+		e.put(2, sing1);
+		e.put(3, sing2);
+		
+		System.out.println(e);
+		System.out.println(b2.getContenutoRaggruppatoPerPeso());
+		assertTrue(this.controllaMap(e, b2.getContenutoRaggruppatoPerPeso()));
+	}
 }

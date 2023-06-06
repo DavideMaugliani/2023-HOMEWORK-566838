@@ -14,7 +14,7 @@ import it.uniroma3.diadia.DiaDia;
 import it.uniroma3.diadia.IOSimulator;
 import it.uniroma3.diadia.fixture.Fixture;
 
-public class ComandoFineTest {
+public class ComandoAiutoTest {
 
 	List<String> righeDaLeggere;
 
@@ -28,15 +28,18 @@ public class ComandoFineTest {
 	}
 
 	@Test
-	public void testPartitaConComandoFine() throws Exception {
+	public void testPartitaConComandoAiuto() throws Exception {
+		righeDaLeggere.add("aiuto");
 		righeDaLeggere.add("fine");
-
 		IOSimulator io = Fixture.creaSimulazionePartitaEGiocaEasy(righeDaLeggere);
 		assertTrue(io.hasNextMessaggio());
 		assertEquals(DiaDia.MESSAGGIO_BENVENUTO, io.nextMessaggio());
+		for(int i=0; i < ComandoAiuto.ELENCO_COMANDI.length; i++) {
+			assertTrue(io.hasNextMessaggio());
+			assertEquals(ComandoAiuto.ELENCO_COMANDI[i]+" ", io.nextMessaggio());
+		}
 		assertTrue(io.hasNextMessaggio());
+		io.nextMessaggio();
 		assertEquals(ComandoFine.MESSAGGIO_FINE, io.nextMessaggio());
-
 	}
-
 }

@@ -1,70 +1,51 @@
 package it.uniroma3.diadia.comandi;
 
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.Assert.assertTrue;
+import java.util.Scanner;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import it.uniroma3.diadia.IOConsole;
 import it.uniroma3.diadia.IO;
-import it.uniroma3.diadia.IOconsole;
-
-
 
 public class FabbricaDiComandiFisarmonicaTest {
-	
-	Comando comandoDaEseguire;
-	IO io;
-	
-	
 
+	private FabbricaDiComandiFisarmonica fabbrica;
+	private IO io;
+	private Comando expected;
+	
 	@Before
 	public void setUp() throws Exception {
-		this.io = new IOconsole();
+		io = new IOConsole(new Scanner(System.in));
+		fabbrica = new FabbricaDiComandiFisarmonica(io);
 	}
-	
-	public boolean testFabbricaDiComandi(String istruzione,String testComando,String testParametro){
-		
-		FabbricaDiComandi factory = new FabbricaDiComandiFisarmonica();
-		comandoDaEseguire = factory.costruisciComando(istruzione,io);
-		comandoDaEseguire.setParametro(testParametro);
-		return(comandoDaEseguire.getNome().equals(testComando) && comandoDaEseguire.getParametro()==testParametro);
-	}
-	
-	@Test
-	public void testVai(){
-		assertTrue(testFabbricaDiComandi("vai","vai","sud"));
+
+	@After
+	public void tearDown() throws Exception {
 	}
 
 	@Test
-	public void testPrendi(){
-		assertTrue(testFabbricaDiComandi("prendi","prendi","osso"));
+	public void testComandoNonValido() {
+		expected = new ComandoNonValido();
+		assertEquals( expected.getNome(), fabbrica.costruisciComando("pippo").getNome());
 	}
 	
 	@Test
-	public void testPosa(){
-		assertTrue(testFabbricaDiComandi("posa","posa","osso"));
+	public void testComandoConParametro() {
+		expected = new ComandoVai();
+		expected.setParametro("nord");
+		Comando current = fabbrica.costruisciComando("vai nord");
+		assertEquals( expected.getNome(), current.getNome());
+		assertEquals( expected.getParametro(), current.getParametro());
+	}
+	
+	@Test
+	public void testComandoSenzaParametro() {
+		expected = new ComandoFine();
+		assertEquals( expected.getNome(), fabbrica.costruisciComando("fine").getNome());
 	}
 
-	@Test
-	public void testGuarda(){
-		assertTrue(testFabbricaDiComandi("guarda","guarda",null));
-	}
-
-	@Test
-	public void testAiuto(){
-		assertTrue(testFabbricaDiComandi("aiuto","aiuto",null));
-	}
-	
-	@Test
-	public void testFine(){
-		assertTrue(testFabbricaDiComandi("fine","fine",null));
-	}
-	
-	@Test
-	public void testNonValido(){
-		assertTrue(testFabbricaDiComandi("","non valido",null));
-
-	}
-	
 }

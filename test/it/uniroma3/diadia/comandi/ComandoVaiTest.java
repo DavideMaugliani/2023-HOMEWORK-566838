@@ -1,105 +1,135 @@
 package it.uniroma3.diadia.comandi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import it.uniroma3.diadia.DiaDia;
+import it.uniroma3.diadia.IO;
+import it.uniroma3.diadia.IOConsole;
 import it.uniroma3.diadia.IOSimulator;
-import it.uniroma3.diadia.IOconsole;
 import it.uniroma3.diadia.Partita;
+import it.uniroma3.diadia.ambienti.Direzione;
 import it.uniroma3.diadia.ambienti.Labirinto;
-import it.uniroma3.diadia.ambienti.LabirintoBuilder;
 import it.uniroma3.diadia.ambienti.Stanza;
 import it.uniroma3.diadia.fixture.Fixture;
 
 public class ComandoVaiTest {
-	
-	private static final String Nome_Stanza_Partenza="Partenza";
-	private static final String Nord="nord";
-	private Partita partita;
-	private Comando comandoVai;
-	private Stanza partenza;
-	
+
+	private Stanza s1;
+	private Stanza s2;
+	private Comando vai;
+	private Partita p;
+	private Partita p2;
+	List<String> righeDaLeggere;
+	List<String> righeDaLeggere2;
+	Labirinto labirinto;
+	Labirinto labirinto2;
+	private IO io;
+
 	@Before
-	public void setUp() throws Exception{
-		this.comandoVai=new ComandoVai();
-		this.comandoVai.setIO(new IOconsole());
-		this.partita=new Partita();
-		this.partenza=new Stanza(Nome_Stanza_Partenza);
-		this.partita.setStanzaCorrente(this.partenza);
+	public void setUp() throws Exception {
+		io = new IOConsole(new Scanner(System.in));
+		s1 = new Stanza("aula 1");
+		s2 = new Stanza("aula 2");
+		vai = new ComandoVai();
+		 labirinto = Labirinto.newBuilder("labirinto2.txt").getLabirinto();
+
+//				 Labirinto.newBuilder()
+//				.addStanzaIniziale("Atrio")
+//				.addAttrezzo("martello", 3)
+//				.addStanzaVincente("Biblioteca")
+//				.addAdiacenza("Atrio", "Biblioteca", "nord")
+//				.getLabirinto();
+		p = new Partita(labirinto);
+		vai.setIo(io);
+		righeDaLeggere = new ArrayList<>();
+		righeDaLeggere2 = new ArrayList<>();
+
+	}
+
+	@After
+	public void tearDown() throws Exception {
 	}
 
 	@Test
-	public void testVaiStanzaNonPresente() {
-		this.comandoVai.setParametro(Nord);
-		this.comandoVai.esegui(this.partita);
-		assertEquals(Nome_Stanza_Partenza, this.partita.getStanzaCorrente().getNome());
+	public void testVaiNull() {
+		p.setStanzaCorrente(s1);
+		vai.esegui(p);
+		assertEquals(s1, p.getStanzaCorrente());
+	}
+
+	@Test
+	public void testVaiDirezioneEsistente() {
+		p.setStanzaCorrente(s1);
+		s1.impostaStanzaAdiacente(Direzione.sud, s2);
+		vai.setParametro("sud");
+		vai.esegui(p);
+		assertEquals(s2, p.getStanzaCorrente());
+	}
+
+	@Test
+	public void testVaiDirezioneInesistente() {
+		p.setStanzaCorrente(s1);
+		s1.impostaStanzaAdiacente(Direzione.sud, s2);
+		vai.setParametro("nord");
+		vai.esegui(p);
+		assertNotEquals(s2, p.getStanzaCorrente());
+	}
+
+	@Test
+	public void testPartitaConComandoVai() throws Exception {
+		righeDaLeggere.add("vai nord");
+
+		IOSimulator io = Fixture.creaSimulazionePartitaEGiocaEasy(righeDaLeggere);
+		assertTrue(io.hasNextMessaggio());
+		assertEquals(DiaDia.MESSAGGIO_BENVENUTO, io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals("Biblioteca", io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals("Hai vinto!", io.nextMessaggio());
+		
 	}
 	
 	@Test
-	public void testVaiStanzaPresente() {
-		Stanza destinazione=new Stanza("Destinazione");
-		this.partenza.impostaStanzaAdiacente(Nord, destinazione);
-		this.comandoVai.setParametro(Nord);
-		this.comandoVai.esegui(partita);
-		assertEquals("Destinazione", this.partita.getStanzaCorrente().getNome());
+	public void testPartitaConComandoVaiOvest() throws Exception {
+		righeDaLeggere2.add("vai ovest");
+		righeDaLeggere2.add("fine");
+
+		IOSimulator io = Fixture.creaSimulazionePartitaEGiocaHard(righeDaLeggere2);
+		assertTrue(io.hasNextMessaggio());
+		assertEquals(DiaDia.MESSAGGIO_BENVENUTO, io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals("Studio", io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals(ComandoFine.MESSAGGIO_FINE, io.nextMessaggio());
 	}
 	
 	@Test
-	public void testVaiStanzaPresenteInDirezioneSbagliata() {
-		Stanza destinazione=new Stanza("Destinazione");
-		this.partenza.impostaStanzaAdiacente("sud", destinazione);
-		this.comandoVai.setParametro(Nord);
-		this.comandoVai.esegui(partita);
-		assertEquals(Nome_Stanza_Partenza, this.partita.getStanzaCorrente().getNome());
-	}
-	
-	@Test
-	public void testPartitaComandoVaiUnaStanza() {
-		List<String> comandoDaEseguire= new ArrayList<>();
-		comandoDaEseguire.add("vai sud");
-		comandoDaEseguire.add(ComandoFine.Nome);
-		LabirintoBuilder b=new LabirintoBuilder();
-		Labirinto lab=b.addStanzaIniziale("iniziale").getLabirinto();
-		IOSimulator io=Fixture.creaSimulazionePartitaEGioca(comandoDaEseguire,lab);
-		assertEquals(io.getOutput().get(1),"Direzione inesistente");
-	}
-	
-	@Test
-	public void testPartitaComandoVaiDueStanze() {
-		List<String> comandoDaEseguire= new ArrayList<>();
-		comandoDaEseguire.add("vai sud");
-		comandoDaEseguire.add(ComandoFine.Nome);
-		LabirintoBuilder b=new LabirintoBuilder();
-		Labirinto lab=b.addStanzaIniziale("iniziale").addStanza("bagno").addAdiacenza("iniziale", "bagno", "sud").getLabirinto();
-		IOSimulator io=Fixture.creaSimulazionePartitaEGioca(comandoDaEseguire,lab);
-		assertEquals(io.getOutput().get(1),lab.getStanzaIniziale().getStanzaAdiacente("sud").getDescrizione());
-	}
-	
-	@Test
-	public void testPartitaComandoVaiTreStanze() {
-		List<String> comandoDaEseguire= new ArrayList<>();
-		comandoDaEseguire.add("vai sud");
-		comandoDaEseguire.add("vai nord");
-		comandoDaEseguire.add("vai ovest");
-		comandoDaEseguire.add(ComandoFine.Nome);
-		LabirintoBuilder b=new LabirintoBuilder();
-		Labirinto lab=b.addStanzaIniziale("iniziale").addStanza("bagno").addAdiacenza("iniziale", "bagno", "sud")
-				.addStanza("cameretta").addAdiacenza("iniziale", "cameretta", "ovest").getLabirinto();
-		IOSimulator io=Fixture.creaSimulazionePartitaEGioca(comandoDaEseguire,lab);
-		assertEquals(io.getOutput().get(1),lab.getStanzaIniziale().getStanzaAdiacente("sud").getDescrizione());
-		assertEquals(io.getOutput().get(2),lab.getStanzaIniziale().getDescrizione());
-		assertEquals(io.getOutput().get(3),lab.getStanzaIniziale().getStanzaAdiacente("ovest").getDescrizione());
-	}
-	
-	public void assertContains(String expected, String interaRiga) {
-		assertTrue(interaRiga.contains(expected));
+	public void testPartitaConComandoVaiOvestEst() throws Exception {
+		righeDaLeggere2.add("vai ovest");
+		righeDaLeggere2.add("vai est");
+		righeDaLeggere2.add("fine");
+
+		IOSimulator io = Fixture.creaSimulazionePartitaEGiocaHard(righeDaLeggere2);
+		assertTrue(io.hasNextMessaggio());
+		assertEquals(DiaDia.MESSAGGIO_BENVENUTO, io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals("Studio", io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals("Atrio", io.nextMessaggio());
+		assertTrue(io.hasNextMessaggio());
+		assertEquals(ComandoFine.MESSAGGIO_FINE, io.nextMessaggio());
 	}
 	
 }
+
+
